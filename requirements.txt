@@ -1,4 +1,3 @@
 translate==3.5.0
 httpx==0.13.3
 hmac
-urllib
