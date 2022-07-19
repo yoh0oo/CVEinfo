@@ -17,7 +17,7 @@ def get_cve():
     if care == 1:
         for risk in risk_like:
             params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk}
-            with httpx.Client(params=params) as client:
+            with httpx.Client(params=params, timeout=None) as client:
                 res = client.get(url).json()
             if res['totalResults'] > 0:
                 res_content(res)
