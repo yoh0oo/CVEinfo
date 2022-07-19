@@ -1,5 +1,4 @@
 translate==3.5.0
 httpx==0.13.3
 hmac
-base64
 urllib
