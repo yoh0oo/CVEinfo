@@ -4,23 +4,27 @@ import hmac
 import hashlib
 import base64
 import urllib.parse
+import logging
 
-def get_cve():
+def get_cve(index = 0):
     risk_like = ['CRITICAL', 'HIGH', 'MEDIUM']  # 关注的威胁级别，可添加
-    care = 1  # 0表示只接收关注组件的漏洞，1表示所有组件的高危漏洞
     url = 'https://services.nvd.nist.gov/rest/json/cves/1.0'
     now = datetime.datetime.now()
-    ago = now-datetime.timedelta(minutes=3)#3
-    pubStartDate = datetime.datetime.strftime(ago, "%Y-%m-%dT%H:%M:%S:000 UTC-08:00")
-    pubEndDate = datetime.datetime.strftime(now, "%Y-%m-%dT%H:%M:%S:000 UTC-08:00")
-
-    if care == 1:
-        for risk in risk_like:
-            params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk}
-            with httpx.Client(params=params, timeout=None) as client:
-                res = client.get(url).json()
-            if res['totalResults'] > 0:
-                res_content(res)
+    ago = now-datetime.timedelta(hours=6)#3
+    pubStartDate = datetime.datetime.strftime(ago, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
+    pubEndDate = datetime.datetime.strftime(now, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
+    for risk in risk_like:
+        params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk,'startIndex':index}
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
+        logging.info(params)
+        with httpx.Client(params=params, timeout=None) as client:
+            res = client.get(url).json()
+        if res['totalResults'] > 0 and res['totalResults'] == res['resultsPerPage']:
+            res_content(res)
+        elif res['totalResults'] > 0 and res['startIndex'] == 0:
+            for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
+                get_cve(index=20*i+1)
+        
 
         
 def res_content(res):
@@ -40,9 +44,9 @@ def res_content(res):
             DingDing(content)#发送到钉钉
 
 def translat(context): #翻译描述信息
-        translator = Translator(to_lang="chinese")
-        translation = translator.translate(context)
-        return translation
+    translator = Translator(to_lang="chinese")
+    translation = translator.translate(context)
+    return translation
 
 # 钉钉推送
 def DingDing(msg):
@@ -62,8 +66,6 @@ def DingDing(msg):
     url=webhook+'&timestamp='+timestamp+'&sign='+sign
     json={"msgtype": "markdown","text": msg,"isAtAll": True}
     httpx.post(url, json=json, headers=head, verify=False)
-    # r=httpx.post(url,json=json,headers=head,verify=False)
-    #print(r.text)
 
 def main():
     while 1:
