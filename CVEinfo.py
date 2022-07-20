@@ -8,6 +8,7 @@ import urllib.parse
 import logging
 
 hours = 6
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
 
 def get_cve(index = 0):
     risk_like = ['CRITICAL', 'HIGH', 'MEDIUM']  # 关注的威胁级别，可添加
@@ -18,18 +19,16 @@ def get_cve(index = 0):
     pubEndDate = datetime.datetime.strftime(now, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
     for risk in risk_like:
         params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk,'startIndex':index}
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
         logging.info(params)
         with httpx.Client(params=params, timeout=None) as client:
             res = client.get(url).json()
-        if res['totalResults'] > 0 and res['totalResults'] == res['resultsPerPage']:
-            res_content(res)
-        elif res['totalResults'] > 0 and res['startIndex'] == 0:
-            for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
-                get_cve(index=20*i+1)
-        
-
-        
+        if res['totalResults'] > 0:
+            if res['totalResults'] == res['resultsPerPage']
+                res_content(res)
+            else:
+                for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
+                    get_cve(index=20*i+1)
+            
 def res_content(res):
     content = ''
 
@@ -68,7 +67,8 @@ def DingDing(msg):
     webhook = 'https://oapi.dingtalk.com/robot/send?access_token='
     url=webhook+'&timestamp='+timestamp+'&sign='+sign
     json={"msgtype": "markdown","text": msg,"isAtAll": True}
-    httpx.post(url, json=json, headers=head, verify=False)
+    r = httpx.post(url, json=json, headers=head, verify=False)
+    logging.info(r)
 
 def main():
     while 1:
