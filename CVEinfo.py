@@ -10,24 +10,28 @@ import logging
 hours = 6
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
 
-def get_cve(index = 0,risk_like = []):
-    risk_like = ['CRITICAL', 'HIGH', 'MEDIUM'] if len(risk_like) == 0 else risk_like  # 关注的威胁级别，可添加
+def req_cve(index = 0,risk = ''):
     url = 'https://services.nvd.nist.gov/rest/json/cves/1.0'
     now = datetime.datetime.now()
     ago = now-datetime.timedelta(hours=hours)#3
     pubStartDate = datetime.datetime.strftime(ago, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
     pubEndDate = datetime.datetime.strftime(now, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
+    params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk,'startIndex':index}
+    logging.info(params)
+    with httpx.Client(params=params, timeout=None) as client:
+        res = client.get(url).json()
+        return res
+
+def get_cve(index = 0,risk_like = []):
+    risk_like = ['CRITICAL', 'HIGH', 'MEDIUM'] if len(risk_like) == 0 else risk_like  # 关注的威胁级别，可添加
     for risk in risk_like:
-        params = {'pubStartDate': pubStartDate,'pubEndDate': pubEndDate,'cvssV3Severity': risk,'startIndex':index}
-        logging.info(params)
-        with httpx.Client(params=params, timeout=None) as client:
-            res = client.get(url).json()
+        res = req_cve(index=index,risk=risk)
         if res['totalResults'] > 0:
             if res['totalResults'] == res['resultsPerPage']:
                 res_content(res)
             else:
                 for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
-                    get_cve(index=20*i+1,risk_like=[risk])
+                    req_cve(index=20*i+1,risk=risk)
             
 def res_content(res):
     content = ''
