@@ -23,7 +23,7 @@ def get_cve(index = 0):
         with httpx.Client(params=params, timeout=None) as client:
             res = client.get(url).json()
         if res['totalResults'] > 0:
-            if res['totalResults'] == res['resultsPerPage']
+            if res['totalResults'] == res['resultsPerPage']:
                 res_content(res)
             else:
                 for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
