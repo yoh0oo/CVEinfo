@@ -1,3 +1,4 @@
+# coding=UTF-8
 import httpx,time,datetime
 from translate import Translator
 import hmac
