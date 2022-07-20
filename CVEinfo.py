@@ -46,7 +46,7 @@ def res_content(res):
             description = res['result']['CVE_Items'][i]['cve']['description']['description_data'][0]['value']
             description = translat(description)#翻译
             description = '漏洞描述：<font color=\"#20993b\">' +description +'</font>\n\n'
-            content = '## 【新增漏洞告警】\n\n'+id +pubdate + baseSeverity+' '+score+description
+            content = '## 【新增CVE漏洞告警】\n\n'+id +pubdate + baseSeverity+' '+score+description
             DingDing(content)#发送到钉钉
 
 def translat(context): #翻译描述信息
