@@ -7,13 +7,13 @@ import base64
 import urllib.parse
 import logging
 
-time = 6
+hours = 6
 
 def get_cve(index = 0):
     risk_like = ['CRITICAL', 'HIGH', 'MEDIUM']  # 关注的威胁级别，可添加
     url = 'https://services.nvd.nist.gov/rest/json/cves/1.0'
     now = datetime.datetime.now()
-    ago = now-datetime.timedelta(hours=time)#3
+    ago = now-datetime.timedelta(hours=hours)#3
     pubStartDate = datetime.datetime.strftime(ago, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
     pubEndDate = datetime.datetime.strftime(now, "%Y-%m-%dT%H:%M:%S:000 UTC+08:00")
     for risk in risk_like:
@@ -73,7 +73,7 @@ def DingDing(msg):
 def main():
     while 1:
         get_cve()
-        time.sleep(3600 * time)
+        time.sleep(3600 * hours)
 
 if __name__ == "__main__":
     main()
