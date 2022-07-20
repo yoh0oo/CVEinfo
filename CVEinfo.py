@@ -10,8 +10,8 @@ import logging
 hours = 6
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
 
-def get_cve(index = 0):
-    risk_like = ['CRITICAL', 'HIGH', 'MEDIUM']  # 关注的威胁级别，可添加
+def get_cve(index = 0,risk_like = []):
+    risk_like = ['CRITICAL', 'HIGH', 'MEDIUM'] if len(risk_like) == 0 else risk_like  # 关注的威胁级别，可添加
     url = 'https://services.nvd.nist.gov/rest/json/cves/1.0'
     now = datetime.datetime.now()
     ago = now-datetime.timedelta(hours=hours)#3
@@ -27,7 +27,7 @@ def get_cve(index = 0):
                 res_content(res)
             else:
                 for i in range(1,math.ceil(res['totalResults']/res['resultsPerPage'])):
-                    get_cve(index=20*i+1)
+                    get_cve(index=20*i+1,risk_like=[risk])
             
 def res_content(res):
     content = ''
