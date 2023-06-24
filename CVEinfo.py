@@ -6,8 +6,9 @@ import hashlib
 import base64
 import urllib.parse
 import requests
+import logging
 
-hours =6
+hours = 1
 
 def req_cve(index = 0,risk = ''):
     url = 'https://services.nvd.nist.gov/rest/json/cves/1.0'
@@ -75,9 +76,23 @@ def DingDing(msg):
     requests.post(url, json=json, headers=head, verify=False)
 
 def main():
+    logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                        level=logging.ERROR,
+                        filename='CVEinfo_ERROR.log',
+                        filemode='a')  # 配置输出格式、日志级别、存储文件及文件打开模式
+    err_count = 0
     while 1:
-        get_cve()
-        time.sleep(3600 * hours)
+        if err_count < 3 :
+            try:
+                get_cve()
+                err_count = 0
+                time.sleep(3600 * hours)
+            except Exception as e:
+                err_count += 1
+                time.sleep(3600)
+                logging.error(e)
+        else:
+            err_count = 0
 
 if __name__ == "__main__":
     main()
